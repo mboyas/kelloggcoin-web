@@ -1,23 +1,38 @@
 <h1>KelloggCoin Ledger</h1>
 
 <!-- Step 1: List all transaction, starting with the ICO -->
-<%
-transactions = Transaction.all
+
+<% 
+transactions = Transaction.all 
 %>
 
+<h1> Transactions </h1>
 <ol>
 <% for transaction in transactions %>
     <li>
-    <% if transaction.from_user != nil %>
-    <%= transaction.amount %> KC from <%= transaction.from_user.name %> to <%= transaction.to_user.name %>
-    <% else %>
+    <% if transaction.from_user == nil %>
     Initial coin offering: <%= transaction.amount %> KC to <%= transaction.to_user.name %>
+    <% else %>
+    <%= transaction.amount %> KC from <%= transaction.from_user.name %> to <%= transaction.to_user.name %>
+    <% end %>
     </li>
 <% end %>
 </ol>
 
 
 <!-- Step 2: Calculate and display the balances -->
+
+<% users = User.all %>
+
+<h1> Balances </h1>
+<ul>
+<% for user in users %>
+    <% balance = Transaction.where({ to_user_id: user.id }).sum(:amount) - Transaction.where({ from_user_id: user.id }).sum(:amount) %>
+    <li>
+    Balance for <%= user.name %>: <%= balance %> KC
+    </li>
+<% end %>
+</ul>
 
 <!-- 
 Expected balances:
@@ -27,3 +42,36 @@ Balance for Evan: 1164 KC
 Balance for Anthony: 1456 KC
 Balance for Krystina: 3516 KC 
 -->
+
+<!-- Extra fun -->
+
+<h1> Transaction Table </h1>
+<table>
+  <tr>
+    <th>Amount</th>
+    <th>From</th>
+    <th>To</th>
+  </tr> 
+  <% for transaction in transactions %>
+  <tr>
+    <td> <%= transaction.amount %> </td>
+    <td> <% if transaction.from_user == nil %> n/a <% else %> <%= transaction.from_user.name %> <% end %> </td>
+    <td> <%= transaction.to_user.name %> </td>
+  </tr>
+  <% end %> 
+</table>
+
+<h1> Balance Table </h1>
+<table>
+  <tr>
+    <th>Name</th>
+    <th>Balance</th>
+  </tr> 
+  <% for user in users %>
+  <tr>
+    <td> <%= user.name %> </td>
+    <td> <%= Transaction.where({ to_user_id: user.id }).sum(:amount) - Transaction.where({ from_user_id: user.id }).sum(:amount) %> </td>
+  </tr>
+  <% end %> 
+</table>
+
